@@ -1,0 +1,29 @@
+[meilisearch]
+api_url = "meilisearch_instance"
+api_key = "meilisearch_api_key_with_write_access"
+#how many events to aggregate before sending them to meilisearch
+insert_size = 1000
+#maximum interval between meilisearch database updates.
+#Only needed if less than 1000 lines have been updated in this timespan
+insert_interval = 50
+[progress]
+#where to store the file that stores the progress of the sync. Should be stored persistently using a docker mount.
+type = "file"
+location = "/app"
+#the database to sync from
+[source]
+type = "mariadb"
+host = "127.0.0.1"
+port = 3306
+database = "DB_NAME"
+user = "DB_USER"
+password = "DB_PASS"
+#one table to sync
+[[sync]]
+#the source is the MySQL table, the index is the meilisearch destination
+index = "orders"
+source = "orderdetails1"
+#a unique field in the source and dest.
+primary_key = "orderNumber"
+#currently unused, all fields will be synced. I will implement partial syncing later.
+fields = ["*"]
