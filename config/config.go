@@ -40,7 +40,7 @@ type Config struct {
 }
 
 func ReadConfig(from string, into *Config) error {
-	viper.SetConfigFile("config.toml")
+	viper.SetConfigFile(from)
 	if err := viper.ReadInConfig(); err != nil {
 		return err
 	}
