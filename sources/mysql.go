@@ -106,8 +106,12 @@ func InitSource(msClient *meilisearch.Client, conf config2.Config) {
 
 	fileData, err := os.ReadFile(conf.ProgressConfig.Location)
 	if err != nil {
-		log.Fatal(err)
+		if !errors.Is(err, os.ErrNotExist) {
+			log.Fatal(err)
+		}
+		log.Println("No progress file found - starting from beginning.")
 	}
+
 	var parsedPos mysql.Position
 	_, err = fmt.Sscanf(string(fileData), "(%s, %d)", &parsedPos.Name, &parsedPos.Pos)
 	if err != nil {
