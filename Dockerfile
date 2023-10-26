@@ -23,6 +23,4 @@ FROM gcr.io/distroless/static-debian11
 
 COPY --from=base /main .
 
-USER small-user:small-user
-
 CMD ["./main"]
