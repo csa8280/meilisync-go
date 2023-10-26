@@ -19,8 +19,10 @@ RUN go mod verify
 
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags "-s -w" -gcflags="all=-N -l" -o /main .
 
-FROM gcr.io/distroless/static-debian11
+FROM alpine
 
 COPY --from=base /main .
+
+RUN apk add mariadb-client
 
 CMD ["./main"]
