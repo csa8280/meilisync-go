@@ -101,7 +101,7 @@ func SendBatches(h *MyEventHandler) error {
 	}
 	h.batchMap = nil
 	h.lastSend = time.Now()
-
+	h.batchSize = 0
 	return nil
 }
 
@@ -149,7 +149,7 @@ func InitSource(msClient *meilisearch.Client, conf config2.Config) {
 }
 
 func startSaver(conf config2.Config, c *canal.Canal) {
-	saveProgressTimer := time.NewTicker(time.Duration(conf.ProgressConfig.SaveInterval))
+	saveProgressTimer := time.NewTicker(time.Duration(conf.ProgressConfig.SaveInterval) * time.Second)
 	defer saveProgressTimer.Stop()
 
 	for {
