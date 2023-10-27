@@ -106,7 +106,7 @@ func SendBatches(h *MyEventHandler) error {
 }
 
 func checkAndSendBatchesRegularly(h *MyEventHandler, interval time.Duration) {
-	ticker := time.NewTicker(interval)
+	ticker := time.NewTicker(interval * time.Second)
 	defer ticker.Stop()
 
 	for {
