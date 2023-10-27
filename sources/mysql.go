@@ -99,7 +99,7 @@ func SendBatches(h *MyEventHandler) error {
 			h.batchDelete = nil
 		}
 	}
-	h.batchMap = nil
+	h.batchMap = make(map[string][]map[string]interface{})
 	h.lastSend = time.Now()
 	h.batchSize = 0
 	return nil
