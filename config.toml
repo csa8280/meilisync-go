@@ -10,6 +10,7 @@ insert_interval = 50
 #where to store the file that stores the progress of the sync. Should be stored persistently using a docker mount.
 type = "file"
 location = "/app"
+save_interval = 10
 #the database to sync from
 [source]
 type = "mariadb"
