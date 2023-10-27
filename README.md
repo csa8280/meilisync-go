@@ -1,12 +1,6 @@
 # Meilisync-Go
 
-Meilisync-Go is a Go program designed to synchronize data from a MySQL database to a Meilisearch instance. It provides a simple and efficient way to keep your Meilisearch index up-to-date with the data stored in your MySQL database.
-
-## Features
-
-- Real-time synchronization: Continuously updates Meilisearch with changes from MySQL.
-- Selective indexing: Choose specific tables or columns to sync.
-- Configurable: Easily configure your MySQL and Meilisearch connection settings.
+Meilisync-Go is a rewrite of the [original python version of meilisync](https://github.com/long2ice/meilisync/) in Go. It has significantly fewer features (at this point in time).
 
 ## Getting Started
 
