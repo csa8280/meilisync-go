@@ -3,13 +3,16 @@ package sources
 import (
 	"errors"
 	"fmt"
-	"github.com/go-mysql-org/go-mysql/canal"
-	"github.com/go-mysql-org/go-mysql/mysql"
-	"github.com/meilisearch/meilisearch-go"
 	"log"
 	config2 "meilisync-go/config"
 	"os"
+	"regexp"
+	"strconv"
+	"strings"
 	"time"
+
+	"github.com/go-mysql-org/go-mysql/canal"
+	"github.com/meilisearch/meilisearch-go"
 )
 
 type MyEventHandler struct {
@@ -25,7 +28,17 @@ func ParseToJson(e *canal.RowsEvent, row []interface{}) (jsonData map[string]int
 	jsonData = make(map[string]interface{})
 	columnNames := e.Table.Columns
 	for i, columnValue := range row {
-		jsonData[columnNames[i].Name] = columnValue
+		switch value := columnValue.(type) {
+		case []byte:
+			{
+				jsonData[columnNames[i].Name] = string(value)
+			}
+		case interface{}:
+			{
+				jsonData[columnNames[i].Name] = value
+			}
+
+		}
 	}
 	return jsonData
 }
@@ -96,38 +109,62 @@ func InitSource(msClient *meilisearch.Client, conf config2.Config) {
 	cfg.User = conf.Source.User
 	cfg.Password = conf.Source.Password
 	cfg.Flavor = conf.Source.Type
-	//cfg.Dump.DiscardErr = true
-	//cfg.Dump.SkipMasterData = true
-	//TODO implement table regex
+
+	cfg.ExcludeTableRegex = []string{"mysql\\..*"}
+	cfg.IncludeTableRegex = func() []string {
+		tables := conf.Tables
+		tablesRegex := make([]string, 0)
+
+		for k, _ := range tables {
+			tablesRegex = append(tablesRegex, fmt.Sprintf(".*\\.%v", k))
+		}
+		singleRegex := []string{
+			strings.Join(tablesRegex, "|"),
+		}
+		log.Print(singleRegex)
+		return singleRegex
+	}()
 
 	c, err := canal.NewCanal(cfg)
 	if err != nil {
 		log.Fatal(err)
 	}
 
+	parsedPos, err := c.GetMasterPos()
+	if err != nil {
+		log.Fatal("Couldn't init parsedPos.")
+	}
+
 	fileData, err := os.ReadFile(conf.ProgressConfig.Location)
 	if err != nil {
 		if !errors.Is(err, os.ErrNotExist) {
-			log.Fatal(err)
+			log.Fatalf("Couldn't continue from file. %v", err)
+		} else {
+			log.Println("No progress file found - starting from beginning.")
 		}
-		log.Println("No progress file found - starting from beginning.")
+	} else {
+		regex := regexp.MustCompile(`\(([^,]+),\s*(\d+)\)`)
+		match := regex.FindStringSubmatch(string(fileData))
+		if len(match) == 3 {
+			name := match[1]
+			pos := match[2]
+			log.Printf("Binlog name: %s. Binlog pos: %s\n", name, pos)
+			parsedPos.Name = name
+			posInt, _ := strconv.Atoi(pos)
+			parsedPos.Pos = uint32(posInt)
+		} else {
+			log.Printf("No match found in the input %v. \n", string(fileData))
+		}
 	}
 
-	var parsedPos mysql.Position
-	_, err = fmt.Sscanf(string(fileData), "(%s, %d)", &parsedPos.Name, &parsedPos.Pos)
 	if err != nil {
 		log.Print("Couldn't continue from file.", err)
-		parsedPos, err = c.GetMasterPos()
-		if err != nil {
-			log.Fatal("Couldn't start pos.", err)
-		}
 	}
 
 	c.SetEventHandler(&MyEventHandler{
 		client: msClient,
 		config: conf,
 	})
-
 	go func() {
 		for {
 			SaveProgress(c, conf)
@@ -139,6 +176,7 @@ func InitSource(msClient *meilisearch.Client, conf config2.Config) {
 		log.Fatal(err)
 	}
 }
+
 func SaveProgress(c *canal.Canal, conf config2.Config) {
 	pos, err := c.GetMasterPos()
 	if err != nil {

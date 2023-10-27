@@ -1,12 +1,13 @@
 package main
 
 import (
-	_ "github.com/go-sql-driver/mysql"
-	"github.com/meilisearch/meilisearch-go"
 	"log"
 	conf "meilisync-go/config"
 	"meilisync-go/sources"
 	"os"
+
+	_ "github.com/go-sql-driver/mysql"
+	"github.com/meilisearch/meilisearch-go"
 )
 
 var config conf.Config
