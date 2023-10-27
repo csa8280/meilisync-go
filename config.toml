@@ -22,9 +22,15 @@ password = "DB_PASS"
 #one table to sync
 [[sync]]
 #the source is the MySQL table, the index is the meilisearch destination
-index = "orders"
-source = "orderdetails1"
+index = "index1"
+source = "table1"
 #a unique field in the source and dest.
-primary_key = "orderNumber"
+primary_key = "id"
 #currently unused, all fields will be synced. I will implement partial syncing later.
+fields = ["*"]
+[[sync]]
+index = "index2"
+source = "table2"
+primary_key = "name"
+#currently unimplemented
 fields = ["*"]
