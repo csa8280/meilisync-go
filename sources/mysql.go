@@ -145,11 +145,18 @@ func InitSource(msClient *meilisearch.Client, conf config2.Config) {
 
 	go startSaver(conf, c)
 	go checkAndSendBatchesRegularly(h, time.Duration(conf.MeiliSearch.InsertInterval))
-
-	err := c.RunFrom(parsedPos)
-	if err != nil {
-		log.Fatal(err)
+	if (parsedPos == mysql.Position{}) {
+		err := c.Run()
+		if err != nil {
+			log.Fatal(err)
+		}
+	} else {
+		err := c.RunFrom(parsedPos)
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
+
 }
 
 func startSaver(conf config2.Config, c *canal.Canal) {
@@ -191,10 +198,7 @@ func initializeCanal(cfg *canal.Config, conf config2.Config) (*canal.Canal, mysq
 		log.Fatal(err)
 	}
 
-	parsedPos, err := c.GetMasterPos()
-	if err != nil {
-		log.Fatal("Couldn't initialize parsedPos.")
-	}
+	var parsedPos mysql.Position
 
 	fileData, err := os.ReadFile(conf.ProgressConfig.Location)
 	if err != nil {
@@ -202,6 +206,7 @@ func initializeCanal(cfg *canal.Config, conf config2.Config) (*canal.Canal, mysq
 			log.Fatalf("Couldn't continue from file. %v", err)
 		} else {
 			log.Println("No progress file found - starting from the beginning.")
+			return c, mysql.Position{}
 		}
 	} else {
 		regex := regexp.MustCompile(`\(([^,]+),\s*(\d+)\)`)
