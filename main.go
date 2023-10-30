@@ -26,13 +26,13 @@ func init() {
 		APIKey: config.MeiliSearch.APIKey,
 	})
 
-	if !client.IsHealthy() {
-		log.Fatal("Couldn't connect to meilisearch client!")
-	}
+	//if !client.IsHealthy() {
+	//	log.Fatal("Couldn't connect to meilisearch client!")
+	//}
 
-	if err != nil {
-		log.Fatal(err)
-	}
+	//if err != nil {
+	//	log.Fatal(err)
+	//}
 
 }
 
