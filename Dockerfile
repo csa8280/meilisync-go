@@ -19,9 +19,9 @@ RUN go mod verify
 
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags "-s -w" -gcflags="all=-N -l" -o /main .
 
-FROM debian:bullseye-slim
+FROM ubuntu:22.04
 
 COPY --from=base /main .
 RUN apt-get update
-RUN apt install -y mysql-client
+RUN apt-get install -y mysql-client
 CMD ["./main"]
