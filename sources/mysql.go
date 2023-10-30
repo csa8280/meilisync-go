@@ -83,6 +83,9 @@ func (h *MyEventHandler) OnRow(e *canal.RowsEvent) error {
 
 func SendBatches(h *MyEventHandler) error {
 	fmt.Printf("sent at %v batch size - %v \n", h.batchSize, time.Now().Format(time.RFC822))
+	if h.batchSize == 0 {
+		return nil
+	}
 	for k, v := range h.batchMap {
 		indexName := h.config.Tables[k].Index
 		index := h.client.Index(indexName)
@@ -92,6 +95,7 @@ func SendBatches(h *MyEventHandler) error {
 		}
 
 		if toDelete := h.batchDelete[k]; toDelete != nil {
+			fmt.Printf("Tried to delete %v", toDelete)
 			_, err = index.DeleteDocuments(toDelete)
 			if err != nil {
 				return err
