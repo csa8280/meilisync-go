@@ -22,7 +22,5 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags "-s -w" -gcflags="al
 FROM debian:bullseye-slim
 
 COPY --from=base /main .
-RUN apt-get update
-RUN apt-get install mysql-client
 
 CMD ["./main"]
