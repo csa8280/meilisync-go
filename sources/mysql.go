@@ -148,7 +148,7 @@ func InitSource(msClient *meilisearch.Client, conf config2.Config) {
 		config:   conf,
 		lastSend: time.Now(), // Initialize lastSend to the current time
 		batchMap: make(map[string][]map[string]interface{}),
-		batchDelete: make(map[string][]string)
+		batchDelete: make(map[string][]string),
 	}
 
 	c.SetEventHandler(h)
