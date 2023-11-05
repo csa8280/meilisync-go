@@ -55,7 +55,7 @@ func (h *MyEventHandler) OnRow(e *canal.RowsEvent) error {
 			row := e.Rows[i]
 
 			rowData := ParseToJson(e, row)
-			if v := rowData["deleted_at"]; v != nil || v != ""{
+			if v := rowData["deleted_at"]; v != nil || v != 0{
 				if h.batchDelete[tableName] == nil {
 					h.batchDelete[tableName] = []string{}
 				}
