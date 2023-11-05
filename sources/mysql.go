@@ -55,6 +55,14 @@ func (h *MyEventHandler) OnRow(e *canal.RowsEvent) error {
 			row := e.Rows[i]
 
 			rowData := ParseToJson(e, row)
+			if _, ok := rowData["deleted_at"]; ok{
+				if h.batchDelete[tableName] == nil {
+					h.batchDelete[tableName] = []string{}
+				}
+				h.batchDelete[tableName] = append(h.batchDelete[tableName], rowData[syncConfig.PrimaryKey].(string))
+				h.batchSize += 1
+				continue
+			}
 			switch e.Action {
 			case canal.DeleteAction:
 				if h.batchDelete[tableName] == nil {
