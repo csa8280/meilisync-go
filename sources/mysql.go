@@ -55,7 +55,7 @@ func (h *MyEventHandler) OnRow(e *canal.RowsEvent) error {
 			row := e.Rows[i]
 
 			rowData := ParseToJson(e, row)
-			if _, ok := rowData["deleted_at"]; ok{
+			if v, ok := rowData["deleted_at"]; v != nil{
 				if h.batchDelete[tableName] == nil {
 					h.batchDelete[tableName] = []string{}
 				}
@@ -148,6 +148,7 @@ func InitSource(msClient *meilisearch.Client, conf config2.Config) {
 		config:   conf,
 		lastSend: time.Now(), // Initialize lastSend to the current time
 		batchMap: make(map[string][]map[string]interface{}),
+		batchDelete: make(map[string][]string)
 	}
 
 	c.SetEventHandler(h)
