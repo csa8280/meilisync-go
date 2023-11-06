@@ -55,14 +55,6 @@ func (h *MyEventHandler) OnRow(e *canal.RowsEvent) error {
 			row := e.Rows[i]
 
 			rowData := ParseToJson(e, row)
-			if v := rowData["deleted_at"]; v != nil || v != 0{
-				if h.batchDelete[tableName] == nil {
-					h.batchDelete[tableName] = []string{}
-				}
-				h.batchDelete[tableName] = append(h.batchDelete[tableName], rowData[syncConfig.PrimaryKey].(string))
-				h.batchSize += 1
-				continue
-			}
 			switch e.Action {
 			case canal.DeleteAction:
 				if h.batchDelete[tableName] == nil {
@@ -71,11 +63,19 @@ func (h *MyEventHandler) OnRow(e *canal.RowsEvent) error {
 				h.batchDelete[tableName] = append(h.batchDelete[tableName], rowData[syncConfig.PrimaryKey].(string))
 				h.batchSize += 1
 			case canal.UpdateAction, canal.InsertAction:
-				if h.batchMap[tableName] == nil {
-					h.batchMap[tableName] = []map[string]interface{}{}
+				if v := rowData["deleted_at"]; v != nil {
+					if h.batchDelete[tableName] == nil {
+						h.batchDelete[tableName] = []string{}
+					}
+					h.batchDelete[tableName] = append(h.batchDelete[tableName], rowData[syncConfig.PrimaryKey].(string))
+					h.batchSize += 1
+				} else {
+					if h.batchMap[tableName] == nil {
+						h.batchMap[tableName] = []map[string]interface{}{}
+					}
+					h.batchMap[tableName] = append(h.batchMap[tableName], rowData)
+					h.batchSize += 1
 				}
-				h.batchMap[tableName] = append(h.batchMap[tableName], rowData)
-				h.batchSize += 1
 			}
 		}
 
@@ -144,10 +144,10 @@ func InitSource(msClient *meilisearch.Client, conf config2.Config) {
 	defer SaveProgress(c, conf)
 
 	h := &MyEventHandler{
-		client:   msClient,
-		config:   conf,
-		lastSend: time.Now(), // Initialize lastSend to the current time
-		batchMap: make(map[string][]map[string]interface{}),
+		client:      msClient,
+		config:      conf,
+		lastSend:    time.Now(), // Initialize lastSend to the current time
+		batchMap:    make(map[string][]map[string]interface{}),
 		batchDelete: make(map[string][]string),
 	}
 
