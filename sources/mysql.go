@@ -60,14 +60,14 @@ func (h *MyEventHandler) OnRow(e *canal.RowsEvent) error {
 				if h.batchDelete[tableName] == nil {
 					h.batchDelete[tableName] = []string{}
 				}
-				h.batchDelete[tableName] = append(h.batchDelete[tableName], rowData[syncConfig.PrimaryKey].(string))
+				h.batchDelete[tableName] = append(h.batchDelete[tableName], fmt.Sprintf("%v", rowData[syncConfig.PrimaryKey]))
 				h.batchSize += 1
 			case canal.UpdateAction, canal.InsertAction:
 				if v := rowData["deleted_at"]; v != nil {
 					if h.batchDelete[tableName] == nil {
 						h.batchDelete[tableName] = []string{}
 					}
-					h.batchDelete[tableName] = append(h.batchDelete[tableName], rowData[syncConfig.PrimaryKey].(string))
+					h.batchDelete[tableName] = append(h.batchDelete[tableName], fmt.Sprintf("%v", rowData[syncConfig.PrimaryKey]))
 					h.batchSize += 1
 				} else {
 					if h.batchMap[tableName] == nil {
