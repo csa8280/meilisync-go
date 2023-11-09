@@ -104,7 +104,7 @@ func SendBatches(h *MyEventHandler) error {
 
 		if toDelete := h.batchDelete[k]; toDelete != nil {
 			fmt.Printf("Tried to delete %v", toDelete)
-			_, err = index.DeleteDocuments("deleted_at IS NOT NULL")
+			_, err = index.DeleteDocumentsByFilter("deleted_at IS NOT NULL")
 			if err != nil {
 				return err
 			}
