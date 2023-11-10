@@ -193,7 +193,7 @@ func configureCanal(conf config2.Config) *canal.Config {
 	// Include tables based on configuration
 	tablesRegex := make([]string, 0)
 	for k := range conf.Tables {
-		tablesRegex = append(tablesRegex, fmt.Sprintf(".*\\.%v", k))
+		tablesRegex = append(tablesRegex, fmt.Sprintf("%v\\.%v", conf.Source.Database, k))
 	}
 
 	cfg.IncludeTableRegex = []string{
