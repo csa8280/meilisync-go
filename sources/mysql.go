@@ -197,7 +197,7 @@ func configureCanal(conf config2.Config) *canal.Config {
 	cfg.User = conf.Source.User
 	cfg.Password = conf.Source.Password
 	cfg.Flavor = conf.Source.Type
-
+	cfg.Dump.DiscardErr = true
 	cfg.ExcludeTableRegex = []string{"mysql\\..*"}
 
 	// Include tables based on configuration
