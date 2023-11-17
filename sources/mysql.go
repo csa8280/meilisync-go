@@ -155,16 +155,26 @@ func InitSource(msClient *meilisearch.Client, conf config2.Config) {
 
 	go startSaver(conf, c)
 	go checkAndSendBatchesRegularly(h, time.Duration(conf.MeiliSearch.InsertInterval))
-	if (parsedPos == mysql.Position{}) {
-		err := c.Run()
+	if conf.ProgressConfig.SkipDump {
+		parsedPos, err := c.GetMasterPos()
 		if err != nil {
 			log.Fatal(err)
 		}
-	} else {
-		err := c.RunFrom(parsedPos)
-		if err != nil {
-			log.Fatal(err)
+		err = c.RunFrom(parsedPos)
+	}else{
+
+		if (parsedPos == mysql.Position{}) {
+			err := c.Run()
+			if err != nil {
+				log.Fatal(err)
+			}
+		} else {
+			err := c.RunFrom(parsedPos)
+			if err != nil {
+				log.Fatal(err)
+			}
 		}
+
 	}
 
 }
