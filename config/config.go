@@ -23,6 +23,7 @@ type SourceConfig struct {
 type ProgressConfig struct {
 	Location     string `mapstructure:"location"`
 	SaveInterval int    `mapstructure:"save_interval"` //save interval in seconds
+	SkipDump     bool   `mapstructure:"skip_dump"`
 }
 
 type SyncConfig struct {
