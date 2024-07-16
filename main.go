@@ -2,9 +2,10 @@ package main
 
 import (
 	"log"
+	"os"
+
 	conf "meilisync-go/config"
 	"meilisync-go/sources"
-	"os"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/meilisearch/meilisearch-go"
@@ -15,7 +16,12 @@ var client *meilisearch.Client
 
 func init() {
 
-	err := conf.ReadConfig(os.Getenv("MEILISYNC_CONFIG_LOCATION"), &config)
+	getenv := os.Getenv("MEILISYNC_CONFIG_LOCATION")
+
+	if getenv == "" {
+		getenv = "config.toml"
+	}
+	err := conf.ReadConfig(getenv, &config)
 	if err != nil {
 		log.Fatalf("Error reading configuration: %s", err)
 	}
