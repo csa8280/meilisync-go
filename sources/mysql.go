@@ -33,6 +33,12 @@ type MyEventHandler struct {
 
 func makeReqColumnData(col *schema.TableColumn, value interface{}) interface{} {
 	switch col.Type {
+	case schema.TYPE_NUMBER:
+		switch value := value.(type) {
+		case int64:
+			// bigint
+			return fmt.Sprintf("%d", value)
+		}
 	case schema.TYPE_ENUM:
 		switch value := value.(type) {
 		case int64:
